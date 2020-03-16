@@ -2,14 +2,19 @@ const express = require("express");
 const app = express();
 const path = require("path");
 const db = require("./db");
+// const axios = require("axios");
 
-app.use("/dist", express.static(path.join(__dirname, "dist")));
-
-app.use("/assets", express.static(path.join(__dirname, "assets")));
+const pathDist = path.join(__dirname, "..", "dist");
+app.use("/dist", express.static(pathDist));
 
 app.get("/", (req, res, next) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+require("./api")(app);
 
 app.use((req, res, next) => {
   next({
@@ -26,8 +31,12 @@ app.use((err, req, res, next) => {
 
 const port = process.env.PORT || 3000;
 
-db.sync().then(() => {
-  app.listen(port, () => {
-    console.log(`listening on port ${port}`);
-  });
-});
+// app.listen(port, () => console.log("listening"));
+
+db.sync()
+  .then(() => {
+    app.listen(port, () => {
+      console.log(`listening on port ${port}`);
+    });
+  })
+  .catch(error => console.error(error));
